@@ -32,7 +32,7 @@ const getUser = async (req, res) => {
   console.log(1, 'Запрос getUser')
 
   try {
-    const {id} = req.params;
+    const {userId} = req.params;
 
     const user = await User.findById(id)
     res.send({data: user})

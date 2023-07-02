@@ -1,4 +1,5 @@
 import Card from '../models/card.js'
+import {User} from "../models/user.js";
 
 
 const createCard = async (req, res) => {
@@ -26,9 +27,9 @@ const getCards = (req, res) => {
 }
 
 const deleteCard = (req, res) => {
-  const {id} = req.params;
+  const {cardId} = req.params;
 
-  Card.findByIdAndRemove(id)
+  Card.findByIdAndRemove(cardId)
     .then(card => {
       res.send({data: card})
     })
@@ -37,8 +38,40 @@ const deleteCard = (req, res) => {
     })
 }
 
+const likeCard = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const {cardId} = req.params;
+
+
+    const card = await Card.findByIdAndUpdate(cardId, {
+        $addToSet: {likes: userId}
+      },
+      {new: true}
+    );
+
+    await card.populate('likes')
+
+    res.send({data: card});
+
+  } catch (err) {
+    res.status(500).send({message: err.message})
+  }
+}
+
+
+const dislikeCard = async (req, res) => {
+  const userId = req.user._id;
+  const {cardId} = req.params;
+
+  const card = await Card.findByIdAndUpdate(cardId, {$pull: {likes: userId}}, {new: true})
+  res.send({data: card})
+}
+
 export {
   createCard,
   getCards,
-  deleteCard
+  deleteCard,
+  likeCard,
+  dislikeCard
 }
