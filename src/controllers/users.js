@@ -1,49 +1,87 @@
-import { User } from "../models/user.js";
+import {User} from "../models/user.js";
 
-const createUser = (req, res) => {
+const createUser = async (req, res) => {
   console.log(1, 'Запрос createUser')
-  console.log(3, req.body)
 
-  const {name, about, avatar} = req.body;
+  try {
+    const {name, about, avatar} = req.body;
 
-  User.create({name, about, avatar})
-    .then(user => {
-      console.log('new user', user)
-      res.send(user)
-    })
-    .catch(err => res.status(500).send({message: err.message}))
+    const user = await User.create({name, about, avatar});
+
+    res.send({data: user})
+  } catch (err) {
+    res.status(500).send({message: err.message})
+  }
+
 }
 
 const getUsers = (req, res) => {
-  console.log(1, 'Запрос getUsers')
-  console.log(2, 'req', req)
-  console.log(3, 'res', res)
+  console.log(1, 'Запрос getUsers');
+  try {
+    const users = User.find({});
 
-  User.find({})
-    .then(users => {
-      console.log('users', users)
-      res.send({data: users})
-    })
-    .catch(err => res.status(500).send({message: err.message}))
+    res.send({data: users})
+  } catch (err) {
+    res.status(500).send({message: err.message})
+  }
+
 }
 
 
-const getUser = (req, res) => {
+const getUser = async (req, res) => {
   console.log(1, 'Запрос getUser')
-  console.log(3, 'req', req)
 
-  const {id} = req.params;
+  try {
+    const {id} = req.params;
 
-  User.findById(id)
-    .then(user => {
-      console.log('user', user)
-      res.send({data: user})
-    })
-    .catch(err => res.status(500).send({message: err.message}))
+    const user = await User.findById(id)
+    res.send({data: user})
+  } catch (err) {
+    res.status(500).send({message: err.message})
+  }
 }
+
+const updateUser = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    const user = await User.findByIdAndUpdate(userId, {...req.body}, {
+      new: true,
+      runValidators: true,
+      upsert: true
+    });
+
+    res.send({data: user});
+
+  } catch (err) {
+    res.status(500).send({message: err.message})
+  }
+}
+
+
+const updateAvatar = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const {avatar} = req.body;
+
+    const user = await User.findByIdAndUpdate(userId, {avatar}, {
+      new: true,
+      runValidators: true,
+      upsert: true
+    });
+
+    res.send({data: user});
+
+  } catch (err) {
+    res.status(500).send({message: err.message})
+  }
+}
+
 
 export {
   createUser,
   getUsers,
-  getUser
+  getUser,
+  updateUser,
+  updateAvatar
 }
