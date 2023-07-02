@@ -2,9 +2,9 @@ import User from "../models/user.js";
 
 
 const createUser = (req, res) => {
-  console.log('createUser')
-  console.log('req', req)
-  console.log('res', res)
+  console.log(1, 'Запрос createUser')
+  console.log(2, 'req', req)
+  console.log(3, req.body)
 
   const {name, about, avatar} = req.body;
 
@@ -17,9 +17,9 @@ const createUser = (req, res) => {
 }
 
 const getUsers = (req, res) => {
-  console.log('getUsers')
-  console.log('req', req)
-  console.log('res', res)
+  console.log(1, 'Запрос getUsers')
+  console.log(2, 'req', req)
+  console.log(3, 'res', res)
 
   User.find({})
     .then(users => {
@@ -31,9 +31,9 @@ const getUsers = (req, res) => {
 
 
 const getUser = (req, res) => {
-  console.log('getUser')
-  console.log('req', req)
-  console.log('res', res)
+  console.log(1, 'Запрос getUser')
+  console.log(2, 'req', req)
+  console.log(3, 'res', res)
 
   User.findById(req.params.id)
     .then(user => {
