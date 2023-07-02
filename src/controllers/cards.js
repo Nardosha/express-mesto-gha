@@ -16,26 +16,26 @@ const createCard = async (req, res) => {
   }
 }
 
-const getCards = (req, res) => {
-  Card.find({})
-    .then(cards => {
-      res.send({data: cards})
-    })
-    .catch(err => {
-      res.status(500).send({message: err.message})
-    })
+const getCards = async (req, res) => {
+  try {
+    const cards = await Card.find({})
+
+    res.send({data: cards})
+  } catch (e) {
+    res.status(500).send({message: e.message})
+  }
 }
 
-const deleteCard = (req, res) => {
-  const {cardId} = req.params;
+const deleteCard = async (req, res) => {
+  try {
+    const {cardId} = req.params;
 
-  Card.findByIdAndRemove(cardId)
-    .then(card => {
-      res.send({data: card})
-    })
-    .catch(err => {
-      res.status(500).send({message: err.message})
-    })
+    const card = await Card.findByIdAndRemove(cardId);
+
+    res.send({data: card});
+  } catch (e) {
+    res.status(500).send({message: e.message})
+  }
 }
 
 const likeCard = async (req, res) => {
