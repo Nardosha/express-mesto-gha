@@ -1,9 +1,7 @@
 import User from "../models/user.js";
 
-
 const createUser = (req, res) => {
   console.log(1, 'Запрос createUser')
-  console.log(2, 'req', req)
   console.log(3, req.body)
 
   const {name, about, avatar} = req.body;
