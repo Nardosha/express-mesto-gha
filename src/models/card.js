@@ -1,7 +1,7 @@
-import * as mongoose from "mongoose";
-import User from "./user.js";
+import mongoose from "mongoose";
+import { userSchema } from "./user.js";
 
-const userSchema = new mongoose.Schema({
+const cardSchema = new mongoose.Schema({
   name: {
     type: String,
     minLength: 2,
@@ -18,7 +18,7 @@ const userSchema = new mongoose.Schema({
     required: true,
   },
   likes: {
-    type: [User],
+    type: [{type: mongoose.Schema.Types.ObjectId, ref: 'user'}],
     default: [],
     required: true,
 
@@ -29,6 +29,6 @@ const userSchema = new mongoose.Schema({
   }
 })
 
-const Card = mongoose.model('user', userSchema);
+const Card = mongoose.model('card', cardSchema);
 
 export default Card;

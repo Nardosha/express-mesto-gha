@@ -2,7 +2,8 @@ import express from 'express';
 import mongosse from 'mongoose';
 import bodyParser from "body-parser";
 
-import usersRouter from "./routes/users.js"
+import usersRoutes from "./routes/users.js"
+import cardRoutes from "./routes/cards.js"
 import {getUser} from "./middlewares/getUser.js";
 
 const { PORT = 3000 } = process.env;
@@ -15,7 +16,8 @@ app.use(bodyParser.json())
 
 app.use(getUser)
 
-app.use('/users', usersRouter)
+app.use('/users', usersRoutes)
+app.use('/cards', cardRoutes)
 
 app.listen(PORT, () => {
   console.log(`Server started on port: ${PORT}`)

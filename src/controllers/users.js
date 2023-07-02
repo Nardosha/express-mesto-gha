@@ -1,4 +1,4 @@
-import User from "../models/user.js";
+import { User } from "../models/user.js";
 
 const createUser = (req, res) => {
   console.log(1, 'Запрос createUser')
@@ -30,10 +30,11 @@ const getUsers = (req, res) => {
 
 const getUser = (req, res) => {
   console.log(1, 'Запрос getUser')
-  console.log(2, 'req', req)
-  console.log(3, 'res', res)
+  console.log(3, 'req', req)
 
-  User.findById(req.params.id)
+  const {id} = req.params;
+
+  User.findById(id)
     .then(user => {
       console.log('user', user)
       res.send({data: user})
