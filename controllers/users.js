@@ -9,7 +9,7 @@ const createUser = async (req, res) => {
 
     res.send({data: user})
   } catch (err) {
-    if (err.name === "CastError" || err.name  === "ValidationError") {
+    if (err.name === "CastError" || err.name === "ValidationError") {
       res.status(INCORRECT_DATA_ERROR_CODE).send({message: "Переданы некорректные данные при создании пользователя."})
       return
     }
@@ -24,7 +24,7 @@ const getUsers = async (req, res) => {
 
     res.send({data: users})
   } catch (err) {
-    if (err.name === "CastError" || err.name  === "ValidationError") {
+    if (err.name === "CastError" || err.name === "ValidationError") {
       res.status(INCORRECT_DATA_ERROR_CODE).send({message: "Переданы некорректные данные при поиске пользователей."})
       return
     }
@@ -40,9 +40,21 @@ const getUser = async (req, res) => {
     const {userId} = req.params;
 
     const user = await User.findById(userId)
+
+    if (!user) {
+      const customError = new Error();
+      customError.name = 'ValidationError'
+      throw customError
+    }
+
     res.send({data: user})
   } catch (err) {
-    if (err.name === "CastError" || err.name  === "ValidationError") {
+    if (err.name === "CastError") {
+      res.status(INCORRECT_DATA_ERROR_CODE).send({message: "ереданы некорректные данные при поиске пользователя."})
+      return
+    }
+
+    if (err.name === "ValidationError") {
       res.status(NOT_FOUND_ERROR_CODE).send({message: "Пользователь по указанному _id не найден."})
       return
     }
@@ -62,7 +74,7 @@ const updateUser = async (req, res) => {
     });
 
     if (!user) {
-      const customError =  new Error();
+      const customError = new Error();
       customError.name = 'ValidationError'
       throw customError
     }
@@ -76,7 +88,7 @@ const updateUser = async (req, res) => {
     }
 
     if (err.name === "ValidationError") {
-      res.status(NOT_FOUND_ERROR_CODE).send({message: "Переданы некорректные данные при обновлении профиля."})
+      res.status(INCORRECT_DATA_ERROR_CODE).send({message: "Переданы некорректные данные при обновлении профиля."})
       return
 
     }
@@ -97,7 +109,7 @@ const updateAvatar = async (req, res) => {
     });
 
     if (!user) {
-      const customError =  new Error();
+      const customError = new Error();
       customError.name = 'ValidationError'
       throw customError
     }
@@ -106,7 +118,7 @@ const updateAvatar = async (req, res) => {
 
   } catch (err) {
     if (err.name === "CastError") {
-      res.status(NOT_FOUND_ERROR_CODE).send({message: "Переданы некорректные данные при обновлении аватара."})
+      res.status(INCORRECT_DATA_ERROR_CODE).send({message: "Переданы некорректные данные при обновлении аватара."})
       return
     }
 

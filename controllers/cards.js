@@ -26,7 +26,7 @@ const getCards = async (req, res) => {
 
     res.send({data: cards});
   } catch (err) {
-    if (err.name === "CastError") {
+    if (err.name === "CastError" || err.name === "ValidationError") {
       res.status(INCORRECT_DATA_ERROR_CODE).send({message: "Переданы некорректные данные при поиске карточек."})
       return
     }
@@ -81,7 +81,7 @@ const likeCard = async (req, res) => {
 
   } catch (err) {
     if (err.name === "CastError") {
-      res.status(NOT_FOUND_ERROR_CODE).send({message: "Передан несуществующий _id карточки."})
+      res.status(INCORRECT_DATA_ERROR_CODE).send({message: "Передан несуществующий _id карточки."})
       return
     }
 
