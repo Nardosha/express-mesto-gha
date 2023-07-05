@@ -1,6 +1,5 @@
 import Card from '../models/card.js'
-import {User} from "../models/user.js";
-
+import {DEFAULT_ERROR_CODE, DEFAULT_MESSAGE, INCORRECT_DATA_ERROR_CODE, NOT_FOUND_ERROR_CODE} from "../utils/ENUMS.js";
 
 const createCard = async (req, res) => {
   try {
@@ -11,8 +10,13 @@ const createCard = async (req, res) => {
 
     res.send({data: card})
 
-  } catch (e) {
-    res.status(500).send({message: e.message})
+  } catch (err) {
+    if (err.name === "CastError") {
+      res.status(NOT_FOUND_ERROR_CODE).send("Переданы некорректные данные при создании карточки.")
+      return
+    }
+
+    res.status(DEFAULT_ERROR_CODE).send(DEFAULT_MESSAGE)
   }
 }
 
@@ -21,8 +25,13 @@ const getCards = async (req, res) => {
     const cards = await Card.find({})
 
     res.send({data: cards})
-  } catch (e) {
-    res.status(500).send({message: e.message})
+  } catch (err) {
+    if (err.name === "CastError") {
+      res.status(INCORRECT_DATA_ERROR_CODE).send("Переданы некорректные данные при поиске карточек.")
+      return
+    }
+
+    res.status(DEFAULT_ERROR_CODE).send(DEFAULT_MESSAGE)
   }
 }
 
@@ -33,8 +42,13 @@ const deleteCard = async (req, res) => {
     const card = await Card.findByIdAndRemove(cardId);
 
     res.send({data: card});
-  } catch (e) {
-    res.status(500).send({message: e.message})
+  } catch (err) {
+    if (err.name === "CastError") {
+      res.status(NOT_FOUND_ERROR_CODE).send("Карточка с указанным _id не найдена.")
+      return
+    }
+
+    res.status(DEFAULT_ERROR_CODE).send(DEFAULT_MESSAGE)
   }
 }
 
@@ -55,17 +69,41 @@ const likeCard = async (req, res) => {
     res.send({data: card});
 
   } catch (err) {
-    res.status(500).send({message: err.message})
+    if (err.name === "CastError") {
+      res.status(NOT_FOUND_ERROR_CODE).send("Передан несуществующий _id карточки.")
+      return
+    }
+
+    if (err.name === "ValidationError") {
+      res.status(NOT_FOUND_ERROR_CODE).send("Переданы некорректные данные для постановки лайка.")
+      return
+
+    }
+    res.status(DEFAULT_ERROR_CODE).send(DEFAULT_MESSAGE)
   }
 }
 
 
 const dislikeCard = async (req, res) => {
-  const userId = req.user._id;
-  const {cardId} = req.params;
+  try {
+    const userId = req.user._id;
+    const {cardId} = req.params;
 
-  const card = await Card.findByIdAndUpdate(cardId, {$pull: {likes: userId}}, {new: true})
-  res.send({data: card})
+    const card = await Card.findByIdAndUpdate(cardId, {$pull: {likes: userId}}, {new: true})
+    res.send({data: card})
+  } catch (err) {
+    if (err.name === "CastError") {
+      res.status(NOT_FOUND_ERROR_CODE).send("Передан несуществующий _id карточки.")
+      return
+    }
+
+    if (err.name === "ValidationError") {
+      res.status(NOT_FOUND_ERROR_CODE).send("Переданы некорректные данные для снятии лайка.")
+      return
+
+    }
+    res.status(DEFAULT_ERROR_CODE).send(DEFAULT_MESSAGE)
+  }
 }
 
 export {

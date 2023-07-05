@@ -1,8 +1,7 @@
 import {User} from "../models/user.js";
+import {DEFAULT_ERROR_CODE, DEFAULT_MESSAGE, INCORRECT_DATA_ERROR_CODE, NOT_FOUND_ERROR_CODE} from "../utils/ENUMS.js";
 
 const createUser = async (req, res) => {
-  console.log(1, 'Запрос createUser')
-
   try {
     const {name, about, avatar} = req.body;
 
@@ -10,34 +9,45 @@ const createUser = async (req, res) => {
 
     res.send({data: user})
   } catch (err) {
-    res.status(500).send({message: err.message})
-  }
+    if (err.name === "CastError") {
+      res.status(NOT_FOUND_ERROR_CODE).send("Переданы некорректные данные при создании пользователя.")
+      return
+    }
 
+    res.status(DEFAULT_ERROR_CODE).send(DEFAULT_MESSAGE)
+  }
 }
 
-const getUsers = (req, res) => {
-  console.log(1, 'Запрос getUsers');
+const getUsers = async (req, res) => {
   try {
-    const users = User.find({});
+    const users = await User.find({});
 
     res.send({data: users})
   } catch (err) {
-    res.status(500).send({message: err.message})
+    if (err.name === "CastError") {
+      res.status(INCORRECT_DATA_ERROR_CODE).send("Переданы некорректные данные при поиске пользователей.")
+      return
+    }
+
+    res.status(DEFAULT_ERROR_CODE).send(DEFAULT_MESSAGE)
   }
 
 }
 
 
 const getUser = async (req, res) => {
-  console.log(1, 'Запрос getUser')
-
   try {
     const {userId} = req.params;
 
-    const user = await User.findById(id)
+    const user = await User.findById(userId)
     res.send({data: user})
   } catch (err) {
-    res.status(500).send({message: err.message})
+    if (err.name === "CastError") {
+      res.status(NOT_FOUND_ERROR_CODE).send("Пользователь по указанному _id не найден.")
+      return
+    }
+
+    res.status(DEFAULT_ERROR_CODE).send(DEFAULT_MESSAGE)
   }
 }
 
@@ -54,7 +64,17 @@ const updateUser = async (req, res) => {
     res.send({data: user});
 
   } catch (err) {
-    res.status(500).send({message: err.message})
+    if (err.name === "CastError") {
+      res.status(NOT_FOUND_ERROR_CODE).send("Пользователь с указанным _id не найден.")
+      return
+    }
+
+    if (err.name === "ValidationError") {
+      res.status(NOT_FOUND_ERROR_CODE).send("Переданы некорректные данные при обновлении профиля.")
+      return
+
+    }
+    res.status(DEFAULT_ERROR_CODE).send(DEFAULT_MESSAGE)
   }
 }
 
@@ -73,7 +93,17 @@ const updateAvatar = async (req, res) => {
     res.send({data: user});
 
   } catch (err) {
-    res.status(500).send({message: err.message})
+    if (err.name === "CastError") {
+      res.status(NOT_FOUND_ERROR_CODE).send("Пользователь с указанным _id не найден.")
+      return
+    }
+
+    if (err.name === "ValidationError") {
+      res.status(NOT_FOUND_ERROR_CODE).send("Переданы некорректные данные при обновлении аватара..")
+      return
+
+    }
+    res.status(DEFAULT_ERROR_CODE).send(DEFAULT_MESSAGE)
   }
 }
 

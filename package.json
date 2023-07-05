@@ -8,7 +8,8 @@
     "start": "node ./src/app.js",
     "dev": "nodemon ./src/app.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "npx eslint . --fix"
+    "lint": "npx eslint . --fix",
+    "startDb": "brew services start mongodb-community@4.4"
   },
   "keywords": [],
   "author": "",
