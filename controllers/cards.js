@@ -11,7 +11,7 @@ const createCard = async (req, res) => {
     res.send({data: card})
 
   } catch (err) {
-    if (err.name === "CastError") {
+    if (err.name === "CastError" || err.name === "ValidationError") {
       res.status(INCORRECT_DATA_ERROR_CODE).send({message: "Переданы некорректные данные при создании карточки."})
       return
     }
