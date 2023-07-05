@@ -10,11 +10,11 @@ const createUser = async (req, res) => {
     res.send({data: user})
   } catch (err) {
     if (err.name === "CastError") {
-      res.status(NOT_FOUND_ERROR_CODE).send("Переданы некорректные данные при создании пользователя.")
+      res.status(NOT_FOUND_ERROR_CODE).send({message: "Переданы некорректные данные при создании пользователя."})
       return
     }
 
-    res.status(DEFAULT_ERROR_CODE).send(DEFAULT_MESSAGE)
+    res.status(DEFAULT_ERROR_CODE).send({message: DEFAULT_MESSAGE})
   }
 }
 
@@ -25,11 +25,11 @@ const getUsers = async (req, res) => {
     res.send({data: users})
   } catch (err) {
     if (err.name === "CastError") {
-      res.status(INCORRECT_DATA_ERROR_CODE).send("Переданы некорректные данные при поиске пользователей.")
+      res.status(INCORRECT_DATA_ERROR_CODE).send({message: "Переданы некорректные данные при поиске пользователей."})
       return
     }
 
-    res.status(DEFAULT_ERROR_CODE).send(DEFAULT_MESSAGE)
+    res.status(DEFAULT_ERROR_CODE).send({message: DEFAULT_MESSAGE})
   }
 
 }
@@ -43,11 +43,11 @@ const getUser = async (req, res) => {
     res.send({data: user})
   } catch (err) {
     if (err.name === "CastError") {
-      res.status(NOT_FOUND_ERROR_CODE).send("Пользователь по указанному _id не найден.")
+      res.status(NOT_FOUND_ERROR_CODE).send({message: "Пользователь по указанному _id не найден."})
       return
     }
 
-    res.status(DEFAULT_ERROR_CODE).send(DEFAULT_MESSAGE)
+    res.status(DEFAULT_ERROR_CODE).send({message: DEFAULT_MESSAGE})
   }
 }
 
@@ -65,16 +65,16 @@ const updateUser = async (req, res) => {
 
   } catch (err) {
     if (err.name === "CastError") {
-      res.status(NOT_FOUND_ERROR_CODE).send("Пользователь с указанным _id не найден.")
+      res.status(NOT_FOUND_ERROR_CODE).send({message: "Пользователь с указанным _id не найден."})
       return
     }
 
     if (err.name === "ValidationError") {
-      res.status(NOT_FOUND_ERROR_CODE).send("Переданы некорректные данные при обновлении профиля.")
+      res.status(NOT_FOUND_ERROR_CODE).send({message: "Переданы некорректные данные при обновлении профиля."})
       return
 
     }
-    res.status(DEFAULT_ERROR_CODE).send(DEFAULT_MESSAGE)
+    res.status(DEFAULT_ERROR_CODE).send({message: DEFAULT_MESSAGE})
   }
 }
 
@@ -94,16 +94,16 @@ const updateAvatar = async (req, res) => {
 
   } catch (err) {
     if (err.name === "CastError") {
-      res.status(NOT_FOUND_ERROR_CODE).send("Пользователь с указанным _id не найден.")
+      res.status(NOT_FOUND_ERROR_CODE).send({message: "Пользователь с указанным _id не найден."})
       return
     }
 
     if (err.name === "ValidationError") {
-      res.status(NOT_FOUND_ERROR_CODE).send("Переданы некорректные данные при обновлении аватара..")
+      res.status(NOT_FOUND_ERROR_CODE).send({message: "Переданы некорректные данные при обновлении аватара."})
       return
 
     }
-    res.status(DEFAULT_ERROR_CODE).send(DEFAULT_MESSAGE)
+    res.status(DEFAULT_ERROR_CODE).send({message: DEFAULT_MESSAGE})
   }
 }
 

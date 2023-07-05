@@ -12,11 +12,11 @@ const createCard = async (req, res) => {
 
   } catch (err) {
     if (err.name === "CastError") {
-      res.status(NOT_FOUND_ERROR_CODE).send("Переданы некорректные данные при создании карточки.")
+      res.status(NOT_FOUND_ERROR_CODE).send({message: "Переданы некорректные данные при создании карточки."})
       return
     }
 
-    res.status(DEFAULT_ERROR_CODE).send(DEFAULT_MESSAGE)
+    res.status(DEFAULT_ERROR_CODE).send({message: DEFAULT_MESSAGE})
   }
 }
 
@@ -27,11 +27,11 @@ const getCards = async (req, res) => {
     res.send({data: cards})
   } catch (err) {
     if (err.name === "CastError") {
-      res.status(INCORRECT_DATA_ERROR_CODE).send("Переданы некорректные данные при поиске карточек.")
+      res.status(INCORRECT_DATA_ERROR_CODE).send({message: "Переданы некорректные данные при поиске карточек."})
       return
     }
 
-    res.status(DEFAULT_ERROR_CODE).send(DEFAULT_MESSAGE)
+    res.status(DEFAULT_ERROR_CODE).send({message: DEFAULT_MESSAGE})
   }
 }
 
@@ -44,11 +44,11 @@ const deleteCard = async (req, res) => {
     res.send({data: card});
   } catch (err) {
     if (err.name === "CastError") {
-      res.status(NOT_FOUND_ERROR_CODE).send("Карточка с указанным _id не найдена.")
+      res.status(NOT_FOUND_ERROR_CODE).send({message: "Карточка с указанным _id не найдена."})
       return
     }
 
-    res.status(DEFAULT_ERROR_CODE).send(DEFAULT_MESSAGE)
+    res.status(DEFAULT_ERROR_CODE).send({message: DEFAULT_MESSAGE})
   }
 }
 
@@ -70,16 +70,16 @@ const likeCard = async (req, res) => {
 
   } catch (err) {
     if (err.name === "CastError") {
-      res.status(NOT_FOUND_ERROR_CODE).send("Передан несуществующий _id карточки.")
+      res.status(NOT_FOUND_ERROR_CODE).send({message: "Передан несуществующий _id карточки."})
       return
     }
 
     if (err.name === "ValidationError") {
-      res.status(NOT_FOUND_ERROR_CODE).send("Переданы некорректные данные для постановки лайка.")
+      res.status(NOT_FOUND_ERROR_CODE).send({message: "Переданы некорректные данные для постановки лайка."})
       return
 
     }
-    res.status(DEFAULT_ERROR_CODE).send(DEFAULT_MESSAGE)
+    res.status(DEFAULT_ERROR_CODE).send({message: DEFAULT_MESSAGE})
   }
 }
 
@@ -93,16 +93,16 @@ const dislikeCard = async (req, res) => {
     res.send({data: card})
   } catch (err) {
     if (err.name === "CastError") {
-      res.status(NOT_FOUND_ERROR_CODE).send("Передан несуществующий _id карточки.")
+      res.status(NOT_FOUND_ERROR_CODE).send({message: "Передан несуществующий _id карточки."})
       return
     }
 
     if (err.name === "ValidationError") {
-      res.status(NOT_FOUND_ERROR_CODE).send("Переданы некорректные данные для снятии лайка.")
+      res.status(NOT_FOUND_ERROR_CODE).send({message: "Переданы некорректные данные для снятии лайка."})
       return
 
     }
-    res.status(DEFAULT_ERROR_CODE).send(DEFAULT_MESSAGE)
+    res.status(DEFAULT_ERROR_CODE).send({message: DEFAULT_MESSAGE})
   }
 }
 
