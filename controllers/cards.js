@@ -85,7 +85,7 @@ const likeCard = async (req, res) => {
       return
     }
 
-    if (err.name === "ValidationError") {
+    if (err.name === "ValidationError" || err.name === "TypeError") {
       res.status(NOT_FOUND_ERROR_CODE).send({message: "Переданы некорректные данные для постановки лайка."})
       return
 
