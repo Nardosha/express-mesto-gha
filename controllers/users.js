@@ -9,8 +9,8 @@ const createUser = async (req, res) => {
 
     res.send({data: user})
   } catch (err) {
-    if (err.name === "CastError") {
-      res.status(NOT_FOUND_ERROR_CODE).send({message: "Переданы некорректные данные при создании пользователя."})
+    if (err.name === "CastError" || err.name  === "ValidationError") {
+      res.status(INCORRECT_DATA_ERROR_CODE).send({message: "Переданы некорректные данные при создании пользователя."})
       return
     }
 
@@ -24,7 +24,7 @@ const getUsers = async (req, res) => {
 
     res.send({data: users})
   } catch (err) {
-    if (err.name === "CastError") {
+    if (err.name === "CastError" || err.name  === "ValidationError") {
       res.status(INCORRECT_DATA_ERROR_CODE).send({message: "Переданы некорректные данные при поиске пользователей."})
       return
     }
@@ -42,7 +42,7 @@ const getUser = async (req, res) => {
     const user = await User.findById(userId)
     res.send({data: user})
   } catch (err) {
-    if (err.name === "CastError") {
+    if (err.name === "CastError" || err.name  === "ValidationError") {
       res.status(NOT_FOUND_ERROR_CODE).send({message: "Пользователь по указанному _id не найден."})
       return
     }
@@ -60,6 +60,12 @@ const updateUser = async (req, res) => {
       runValidators: true,
       upsert: true
     });
+
+    if (!user) {
+      const customError =  new Error();
+      customError.name = 'ValidationError'
+      throw customError
+    }
 
     res.send({data: user});
 
@@ -90,16 +96,22 @@ const updateAvatar = async (req, res) => {
       upsert: true
     });
 
+    if (!user) {
+      const customError =  new Error();
+      customError.name = 'ValidationError'
+      throw customError
+    }
+
     res.send({data: user});
 
   } catch (err) {
     if (err.name === "CastError") {
-      res.status(NOT_FOUND_ERROR_CODE).send({message: "Пользователь с указанным _id не найден."})
+      res.status(NOT_FOUND_ERROR_CODE).send({message: "Переданы некорректные данные при обновлении аватара."})
       return
     }
 
     if (err.name === "ValidationError") {
-      res.status(NOT_FOUND_ERROR_CODE).send({message: "Переданы некорректные данные при обновлении аватара."})
+      res.status(NOT_FOUND_ERROR_CODE).send({message: "Пользователь с указанным _id не найден."})
       return
 
     }

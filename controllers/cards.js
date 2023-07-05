@@ -12,7 +12,7 @@ const createCard = async (req, res) => {
 
   } catch (err) {
     if (err.name === "CastError") {
-      res.status(NOT_FOUND_ERROR_CODE).send({message: "Переданы некорректные данные при создании карточки."})
+      res.status(INCORRECT_DATA_ERROR_CODE).send({message: "Переданы некорректные данные при создании карточки."})
       return
     }
 
@@ -24,7 +24,7 @@ const getCards = async (req, res) => {
   try {
     const cards = await Card.find({})
 
-    res.send({data: cards})
+    res.send({data: cards});
   } catch (err) {
     if (err.name === "CastError") {
       res.status(INCORRECT_DATA_ERROR_CODE).send({message: "Переданы некорректные данные при поиске карточек."})
@@ -41,9 +41,20 @@ const deleteCard = async (req, res) => {
 
     const card = await Card.findByIdAndRemove(cardId);
 
+    if (!card) {
+      const customError = new Error();
+      customError.name = 'ValidationError'
+      throw customError
+    }
+
     res.send({data: card});
   } catch (err) {
     if (err.name === "CastError") {
+      res.status(INCORRECT_DATA_ERROR_CODE).send({message: "Переданы некорректные данные карточки."})
+      return
+    }
+
+    if (err.name === "ValidationError") {
       res.status(NOT_FOUND_ERROR_CODE).send({message: "Карточка с указанным _id не найдена."})
       return
     }
@@ -90,10 +101,17 @@ const dislikeCard = async (req, res) => {
     const {cardId} = req.params;
 
     const card = await Card.findByIdAndUpdate(cardId, {$pull: {likes: userId}}, {new: true})
+
+    if (!card) {
+      const customError = new Error();
+      customError.name = 'ValidationError'
+      throw customError
+    }
+
     res.send({data: card})
   } catch (err) {
     if (err.name === "CastError") {
-      res.status(NOT_FOUND_ERROR_CODE).send({message: "Передан несуществующий _id карточки."})
+      res.status(INCORRECT_DATA_ERROR_CODE).send({message: "Передан несуществующий _id карточки."})
       return
     }
 
