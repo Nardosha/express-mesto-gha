@@ -4,7 +4,6 @@ import bodyParser from "body-parser";
 
 import usersRoutes from "./routes/users.js"
 import cardRoutes from "./routes/cards.js"
-import {getUser} from "./middlewares/getUser.js";
 
 const { PORT = 3000 } = process.env;
 
@@ -14,7 +13,13 @@ const app = express();
 
 app.use(bodyParser.json())
 
-app.use(getUser)
+app.use((req, res, next) => {
+  req.user = {
+    _id: '64a18a39e1ccf7087dda39f3'
+  };
+
+  next();
+});
 
 app.use('/users', usersRoutes)
 app.use('/cards', cardRoutes)
