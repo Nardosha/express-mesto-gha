@@ -8,9 +8,9 @@ import {NOT_FOUND_ERROR_CODE} from "./utils/ENUMS.js";
 
 dotenv.config();
 
-const { PORT = 3000, DB_CONNECTION } = process.env;
+const { PORT = 3000 } = process.env;
 
-mongosse.connect(DB_CONNECTION);
+mongosse.connect("mongodb://localhost:27017/mestodb");
 
 const app = express();
 
