@@ -12,9 +12,10 @@
     "startDb": "brew services start mongodb-community@4.4"
   },
   "keywords": [],
-  "author": "",
+  "author": "Natalia Degtyareva",
   "license": "ISC",
   "devDependencies": {
+    "dotenv": "^16.3.1",
     "eslint": "^8.44.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.27.5",

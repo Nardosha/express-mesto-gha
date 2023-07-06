@@ -1,15 +1,16 @@
 import express from 'express';
 import mongosse from 'mongoose';
 import bodyParser from "body-parser";
-
+import dotenv from 'dotenv';
 import usersRoutes from "./routes/users.js"
 import cardRoutes from "./routes/cards.js"
-
 import {NOT_FOUND_ERROR_CODE} from "./utils/ENUMS.js";
 
-const { PORT = 3000 } = process.env;
+dotenv.config();
 
-mongosse.connect('mongodb://localhost:27017/mestodb');
+const { PORT = 3000, DB_CONNECTION } = process.env;
+
+mongosse.connect(DB_CONNECTION);
 
 const app = express();
 
