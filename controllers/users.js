@@ -3,6 +3,19 @@ import {DEFAULT_ERROR_CODE, DEFAULT_MESSAGE, INCORRECT_DATA_ERROR_CODE, NOT_FOUN
 import bcrypt from 'bcryptjs'
 import jwt from "jsonwebtoken"
 
+const getUserInfo = async (req, res) => {
+  try {
+    const { _id } = req.user
+    const user = await User.findById(_id)
+    if (!user) {
+      throw new Error('Nya')
+    }
+    res.send({data: user})
+  } catch (err) {
+    res.status(401).send({message: err.message})
+  }
+}
+
 const login = async (req, res) => {
   try {
     const {email, password} = req.body;
@@ -81,7 +94,7 @@ const getUser = async (req, res) => {
     res.send({data: user})
   } catch (err) {
     if (err.name === "CastError") {
-      res.status(INCORRECT_DATA_ERROR_CODE).send({message: "ереданы некорректные данные при поиске пользователя."})
+      res.status(INCORRECT_DATA_ERROR_CODE).send({message: "Переданы некорректные данные при поиске пользователя."})
       return
     }
 
@@ -168,5 +181,6 @@ export {
   getUsers,
   getUser,
   updateUser,
-  updateAvatar
+  updateAvatar,
+  getUserInfo
 }

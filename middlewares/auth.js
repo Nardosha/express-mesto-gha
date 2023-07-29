@@ -1,22 +1,27 @@
 import jwt from "jsonwebtoken";
 
+const extractBearerToken = (header) => {
+  return header.replace('Bearer ', '');
+};
+
+const handleAuthException = (res) => {
+  res.status(401).send({message: 'Необходима авторизация'});
+}
+
 export const auth = (req, res, next) => {
-  const {authorization} = req.headers
-
-  if (!(authorization || authorization.startWith('Bearer '))) {
-    throw new Error('Необходима авторизация')
-  }
-
-  const token = authorization.replace('Bearer ', '')
-  let payload;
   try {
-    payload = jwt.verify(token, 'shrek')
-  } catch (err) {
-    return res.status(401).send({ message: 'Необходима авторизация' });
-  }
+    const {authorization} = req.headers
 
-  req.user = payload
-  console.log(req.user)
-  next()
+    if (!authorization || !authorization?.startsWith('Bearer ')) {
+      handleAuthException(res)
+    }
+
+    const token = extractBearerToken(authorization)
+
+    req.user = jwt.verify(token, 'shrek')
+    next()
+  } catch (err) {
+    return res.status(500).send({message: err.message});
+  }
 }
 
