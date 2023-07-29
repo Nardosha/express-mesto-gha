@@ -3,7 +3,7 @@ import {DEFAULT_ERROR_CODE, DEFAULT_MESSAGE, INCORRECT_DATA_ERROR_CODE, NOT_FOUN
 
 const createUser = async (req, res) => {
   try {
-    const {name, about, avatar} = req.body;
+    const {name, about, avatar, email, password} = req.body;
 
     const user = await User.create({name, about, avatar});
 
