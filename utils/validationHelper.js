@@ -22,10 +22,9 @@ export const validateUserData = celebrate({
   }).unknown(true)
 })
 
-export const validateId = celebrate({
+export const validateUserId = celebrate({
   params: Joi.object().keys({
-    _id: Joi.number().required().custom((id, helpers) => {
-      console.log(id)
+    userId: Joi.number().required().custom((id, helpers) => {
       if (!mongoose.Schema.Types.ObjectId.isValid(id)) {
         return helpers.message(INCORRECT_ID_ERROR)
       }
@@ -46,5 +45,16 @@ export const validateCardData = celebrate({
     link: Joi.string().required(),
     likes: Joi.array(),
     createdAt: Joi.date()
+  }).unknown(true)
+})
+
+export const validateCardId = celebrate({
+  params: Joi.object().keys({
+    cardId: Joi.number().required().custom((id, helpers) => {
+      if (!mongoose.Schema.Types.ObjectId.isValid(id)) {
+        return helpers.message(INCORRECT_ID_ERROR)
+      }
+      return id
+    })
   }).unknown(true)
 })
