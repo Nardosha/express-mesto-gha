@@ -23,6 +23,10 @@ app.use((req, res) => {
   res.status(NOT_FOUND_ERROR_CODE).send({message: "Запрашиваемой страницы не существует"})
 });
 
+app.use((err, req, res, next) => {
+  res.status(err.statusCode).send({ message: err.message });
+});
+
 app.listen(PORT, () => {
   console.log(`Server started on port: ${PORT}`)
 })

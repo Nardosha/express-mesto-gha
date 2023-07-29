@@ -1,19 +1,17 @@
 import jwt from "jsonwebtoken";
+import UnauthorizedError from "../errors/UnauthorizedError.js";
+import {UNAUTHORIZED_ERROR} from "../utils/ENUMS.js";
 
 const extractBearerToken = (header) => {
   return header.replace('Bearer ', '');
 };
-
-const handleAuthException = (res) => {
-  res.status(401).send({message: 'Необходима авторизация'});
-}
 
 export const auth = (req, res, next) => {
   try {
     const {authorization} = req.headers
 
     if (!authorization || !authorization?.startsWith('Bearer ')) {
-      handleAuthException(res)
+      throw new UnauthorizedError(UNAUTHORIZED_ERROR)
     }
 
     const token = extractBearerToken(authorization)
@@ -21,7 +19,7 @@ export const auth = (req, res, next) => {
     req.user = jwt.verify(token, 'shrek')
     next()
   } catch (err) {
-    return res.status(500).send({message: err.message});
+    next(err)
   }
 }
 

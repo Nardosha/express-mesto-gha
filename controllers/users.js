@@ -1,28 +1,24 @@
 import {User} from "../models/user.js";
-import {DEFAULT_ERROR_CODE, DEFAULT_MESSAGE, INCORRECT_DATA_ERROR_CODE, NOT_FOUND_ERROR_CODE} from "../utils/ENUMS.js";
+import {
+  DEFAULT_ERROR_CODE,
+  DEFAULT_MESSAGE,
+  INCORRECT_DATA_ERROR_CODE, INTERSECTION_ERROR,
+  NOT_FOUND_ERROR_CODE, NOT_FOUND_USER_ERROR,
+  WRONG_AUTH_ERROR
+} from "../utils/ENUMS.js";
 import bcrypt from 'bcryptjs'
 import jwt from "jsonwebtoken"
+import NotFoundError from "../errors/NotFoundError.js";
+import UnauthorizedError from "../errors/UnauthorizedError.js";
+import intersectionError from "../errors/IntersectionError.js";
 
-const getUserInfo = async (req, res) => {
-  try {
-    const { _id } = req.user
-    const user = await User.findById(_id)
-    if (!user) {
-      throw new Error('Nya')
-    }
-    res.send({data: user})
-  } catch (err) {
-    res.status(401).send({message: err.message})
-  }
-}
-
-const login = async (req, res) => {
+const login = async (req, res, next) => {
   try {
     const {email, password} = req.body;
     const user = await User.findUserByCredentials(email, password)
 
     if (!user) {
-      throw new Error('Неверные имя пользоваеля или пароль')
+      throw new UnauthorizedError(WRONG_AUTH_ERROR)
     }
 
     const token = jwt.sign({_id: user._id}, 'shrek', {
@@ -33,13 +29,14 @@ const login = async (req, res) => {
       maxAge: 3600000 * 24 * 7,
       httpOnly: true
     })
+
     res.send(token)
   } catch (err) {
-    res.status(401).send({message: err.message})
+    next(err)
   }
 }
 
-const createUser = async (req, res) => {
+const createUser = async (req, res, next) => {
   try {
     const {
       name = undefined,
@@ -52,62 +49,60 @@ const createUser = async (req, res) => {
     const hash = await bcrypt.hash(password, 10)
 
     const user = await User.create({name, about, avatar, email, password: hash});
+
     res.send({data: user})
   } catch (err) {
-    if (err.name === "CastError" || err.name === "ValidationError") {
-      res.status(INCORRECT_DATA_ERROR_CODE).send({message: "Переданы некорректные данные при создании пользователя."})
+    if (err.code === 11000) {
+      next(new intersectionError(INTERSECTION_ERROR))
       return
     }
 
-    res.status(DEFAULT_ERROR_CODE).send({message: DEFAULT_MESSAGE})
+    next(err)
   }
 }
 
-const getUsers = async (req, res) => {
+const getUsers = async (req, res, next) => {
   try {
     const users = await User.find({});
 
     res.send({data: users})
   } catch (err) {
-    if (err.name === "CastError" || err.name === "ValidationError") {
-      res.status(INCORRECT_DATA_ERROR_CODE).send({message: "Переданы некорректные данные при поиске пользователей."})
-      return
-    }
-
-    res.status(DEFAULT_ERROR_CODE).send({message: DEFAULT_MESSAGE})
+    next(err)
   }
-
 }
 
-const getUser = async (req, res) => {
+const getUser = async (req, res, next) => {
   try {
     const {userId} = req.params;
 
     const user = await User.findById(userId)
 
     if (!user) {
-      const customError = new Error();
-      customError.name = 'ValidationError'
-      throw customError
+      throw new NotFoundError(NOT_FOUND_USER_ERROR)
     }
 
     res.send({data: user})
   } catch (err) {
-    if (err.name === "CastError") {
-      res.status(INCORRECT_DATA_ERROR_CODE).send({message: "Переданы некорректные данные при поиске пользователя."})
-      return
-    }
-
-    if (err.name === "ValidationError") {
-      res.status(NOT_FOUND_ERROR_CODE).send({message: "Пользователь по указанному _id не найден."})
-      return
-    }
-
-    res.status(DEFAULT_ERROR_CODE).send({message: DEFAULT_MESSAGE})
+    next(err)
   }
 }
 
-const updateUser = async (req, res) => {
+const getUserInfo = async (req, res, next) => {
+  try {
+    const {_id} = req.user
+    const user = await User.findById(_id)
+
+    if (!user) {
+      throw new NotFoundError('Нет пользователя с таким id');
+    }
+
+    res.send({data: user})
+  } catch (err) {
+    next(err)
+  }
+}
+
+const updateUser = async (req, res, next) => {
   try {
     const userId = req.user._id;
 
@@ -118,29 +113,17 @@ const updateUser = async (req, res) => {
     });
 
     if (!user) {
-      const customError = new Error();
-      customError.name = 'ValidationError'
-      throw customError
+      throw new NotFoundError(NOT_FOUND_USER_ERROR)
     }
 
     res.send({data: user});
 
   } catch (err) {
-    if (err.name === "CastError") {
-      res.status(NOT_FOUND_ERROR_CODE).send({message: "Пользователь с указанным _id не найден."})
-      return
-    }
-
-    if (err.name === "ValidationError") {
-      res.status(INCORRECT_DATA_ERROR_CODE).send({message: "Переданы некорректные данные при обновлении профиля."})
-      return
-
-    }
-    res.status(DEFAULT_ERROR_CODE).send({message: DEFAULT_MESSAGE})
+    next(err)
   }
 }
 
-const updateAvatar = async (req, res) => {
+const updateAvatar = async (req, res, next) => {
   try {
     const userId = req.user._id;
     const {avatar} = req.body;
@@ -152,25 +135,12 @@ const updateAvatar = async (req, res) => {
     });
 
     if (!user) {
-      const customError = new Error();
-      customError.name = 'ValidationError'
-      throw customError
+      throw new NotFoundError(NOT_FOUND_USER_ERROR)
     }
 
     res.send({data: user});
-
   } catch (err) {
-    if (err.name === "CastError") {
-      res.status(INCORRECT_DATA_ERROR_CODE).send({message: "Переданы некорректные данные при обновлении аватара."})
-      return
-    }
-
-    if (err.name === "ValidationError") {
-      res.status(NOT_FOUND_ERROR_CODE).send({message: "Пользователь с указанным _id не найден."})
-      return
-
-    }
-    res.status(DEFAULT_ERROR_CODE).send({message: DEFAULT_MESSAGE})
+    next(err)
   }
 }
 
