@@ -15,3 +15,5 @@ export const UNAUTHORIZED_ERROR = 'Необходимо авторизовать
 export const INCORRECT_ID_ERROR = 'Некорректный идентификатор.'
 export const REQUIRED_PASSWORD_ERR = 'Введите пароль'
 export const REQUIRED_EMAIL_ERR = 'Введите email'
+export const REQUIRED_CARD_NAME_ERR = 'Введите название'
+export const REQUIRED_LINK_ERR = 'Введите адрес карточки'
