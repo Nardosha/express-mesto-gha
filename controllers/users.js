@@ -11,6 +11,7 @@ const login = async (req, res) => {
     if (!user) {
       throw new Error('Неверные имя пользоваеля или пароль')
     }
+
     const token = jwt.sign({_id: user._id}, 'shrek', {
       expiresIn: 3600000 * 24 * 7
     })

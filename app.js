@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 import usersRoutes from "./routes/users.js"
 import cardRoutes from "./routes/cards.js"
 import {NOT_FOUND_ERROR_CODE} from "./utils/ENUMS.js";
-
+import {auth} from "./middlewares/auth.js";
 dotenv.config();
 
 const { PORT = 3000 } = process.env;
@@ -16,16 +16,10 @@ const app = express();
 
 app.use(bodyParser.json())
 
-app.use((req, res, next) => {
-  req.user = {
-    _id: '64a5ddd72dadb1f181d2cd77'
-  };
-
-  next();
-});
-
 app.use('/users', usersRoutes)
 app.use('/cards', cardRoutes)
+
+app.use(auth);
 
 app.use((req, res) => {
   res.status(NOT_FOUND_ERROR_CODE).send({message: "Запрашиваемой страницы не существует"})
