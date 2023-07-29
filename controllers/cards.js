@@ -38,8 +38,9 @@ const getCards = async (req, res) => {
 const deleteCard = async (req, res) => {
   try {
     const {cardId} = req.params;
+    const {_id: userId} = req.user
 
-    const card = await Card.findByIdAndRemove(cardId);
+    const card = await Card.findById(cardId)
 
     if (!card) {
       const customError = new Error();
@@ -47,7 +48,16 @@ const deleteCard = async (req, res) => {
       throw customError
     }
 
-    res.send({data: card});
+    const ownerId = card.owner.toString()
+    const isOwner = ownerId === userId
+
+    if (!isOwner) {
+      res.status(403).send({message: 'Невозожно удалить чужую карточку'})
+    }
+
+    const deletedCard = await Card.deleteOne(card)
+
+    res.send({data: deletedCard});
   } catch (err) {
     if (err.name === "CastError") {
       res.status(INCORRECT_DATA_ERROR_CODE).send({message: "Переданы некорректные данные карточки."})
