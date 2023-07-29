@@ -84,7 +84,6 @@ const likeCard = async (req, res, next) => {
   }
 }
 
-
 const dislikeCard = async (req, res, next) => {
   try {
     const userId = req.user._id;

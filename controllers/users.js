@@ -144,7 +144,6 @@ const updateAvatar = async (req, res, next) => {
   }
 }
 
-
 export {
   login,
   createUser,
