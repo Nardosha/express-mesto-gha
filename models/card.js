@@ -1,15 +1,16 @@
 import mongoose from "mongoose";
+import {REQUIRED_CARD_NAME_ERR, REQUIRED_LINK_ERR} from "../utils/ENUMS.js";
 
 const cardSchema = new mongoose.Schema({
   name: {
     type: String,
     minLength: 2,
     maxLength: 30,
-    required: true,
+    required: [true, REQUIRED_CARD_NAME_ERR],
   },
   link:{
     type: String,
-    required: true,
+    required: [true, REQUIRED_LINK_ERR],
   },
   owner: {
     type: mongoose.Schema.Types.ObjectId,
@@ -19,7 +20,6 @@ const cardSchema = new mongoose.Schema({
   likes: {
     type: [{type: mongoose.Schema.Types.ObjectId, ref: 'user'}],
     default: [],
-    required: true,
 
   },
   createdAt: {
