@@ -1,12 +1,43 @@
 import {User} from "../models/user.js";
 import {DEFAULT_ERROR_CODE, DEFAULT_MESSAGE, INCORRECT_DATA_ERROR_CODE, NOT_FOUND_ERROR_CODE} from "../utils/ENUMS.js";
+import bcrypt from 'bcryptjs'
+import jwt from "jsonwebtoken"
+
+const login = async (req, res) => {
+  try {
+    const {email, password} = req.body;
+    const user = await User.findUserByCredentials(email, password)
+
+    if (!user) {
+      throw new Error('Неверные имя пользоваеля или пароль')
+    }
+    const token = jwt.sign({_id: user._id}, 'shrek', {
+      expiresIn: 3600000 * 24 * 7
+    })
+
+    res.cookie('jwt', token, {
+      maxAge: 3600000 * 24 * 7,
+      httpOnly: true
+    })
+    res.send(token)
+  } catch (err) {
+    res.status(401).send({message: err.message})
+  }
+}
 
 const createUser = async (req, res) => {
   try {
-    const {name, about, avatar, email, password} = req.body;
+    const {
+      name = undefined,
+      about = undefined,
+      avatar = undefined,
+      email,
+      password
+    } = req.body;
 
-    const user = await User.create({name, about, avatar});
+    const hash = await bcrypt.hash(password, 10)
 
+    const user = await User.create({name, about, avatar, email, password: hash});
     res.send({data: user})
   } catch (err) {
     if (err.name === "CastError" || err.name === "ValidationError") {
@@ -33,7 +64,6 @@ const getUsers = async (req, res) => {
   }
 
 }
-
 
 const getUser = async (req, res) => {
   try {
@@ -96,7 +126,6 @@ const updateUser = async (req, res) => {
   }
 }
 
-
 const updateAvatar = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -133,6 +162,7 @@ const updateAvatar = async (req, res) => {
 
 
 export {
+  login,
   createUser,
   getUsers,
   getUser,
