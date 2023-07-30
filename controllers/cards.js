@@ -38,9 +38,13 @@ const deleteCard = async (req, res, next) => {
     const {cardId} = req.params;
     const {_id: userId} = req.user
 
+    const card = await Card.findById(cardId)
 
-    const isOwner = Card.isOwner(cardId, userId)
+    if (!card) {
+      throw new NotFoundError(NOT_FOUND_CARD_ERROR)
+    }
 
+    const isOwner = card.owner.toString() === userId
 
     if (!isOwner) {
       throw new ForbiddenError(DELETE_CARD_FORBIDDEN_ERROR)

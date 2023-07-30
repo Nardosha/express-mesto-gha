@@ -41,20 +41,6 @@ const cardSchema = new mongoose.Schema({
   }
 })
 
-cardSchema.statics.isOwner = async function (cardId, userId) {
-  try {
-    const card = await Card.findById(cardId)
-
-    if (!card) {
-      throw new NotFoundError(NOT_FOUND_CARD_ERROR)
-    }
-
-    return card.owner.toString() === userId
-  } catch (err) {
-    throw err
-  }
-}
-
 const Card = mongoose.model('card', cardSchema);
 
 export default Card;
