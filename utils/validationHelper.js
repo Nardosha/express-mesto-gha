@@ -8,7 +8,7 @@ export const validateLogin = celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email(),
     password: Joi.string().required()
-  })
+  }).unknown(true)
 })
 
 
@@ -17,15 +17,13 @@ export const validateUserData = celebrate({
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
     avatar: Joi.string().regex(URL_PATTERN),
-    email: Joi.string().required().email(),
-    password: Joi.string().required(),
   }).unknown(true)
 })
 
 export const validateUserId = celebrate({
   params: Joi.object().keys({
-    userId: Joi.number().required().custom((id, helpers) => {
-      if (!mongoose.Schema.Types.ObjectId.isValid(id)) {
+    userId: Joi.string().required().custom((id, helpers) => {
+      if (!mongoose.Types.ObjectId.isValid(id)) {
         return helpers.message(INCORRECT_ID_ERROR)
       }
       return id
@@ -42,7 +40,7 @@ export const validateUserUrl = celebrate({
 export const validateCardData = celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),
-    link: Joi.string().required(),
+    link: Joi.string().required().regex(URL_PATTERN),
     likes: Joi.array(),
     createdAt: Joi.date()
   }).unknown(true)
@@ -50,8 +48,8 @@ export const validateCardData = celebrate({
 
 export const validateCardId = celebrate({
   params: Joi.object().keys({
-    cardId: Joi.number().required().custom((id, helpers) => {
-      if (!mongoose.Schema.Types.ObjectId.isValid(id)) {
+    cardId: Joi.string().required().custom((id, helpers) => {
+      if (!mongoose.Types.ObjectId.isValid(id)) {
         return helpers.message(INCORRECT_ID_ERROR)
       }
       return id

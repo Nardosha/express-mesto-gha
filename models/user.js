@@ -56,8 +56,8 @@ userSchema.statics.findUserByCredentials = async function (email, password) {
     }
 
     return user
-  } catch (e) {
-    console.log('catch in findUserByCredentials', e)
+  } catch (err) {
+    throw err
   }
 }
 

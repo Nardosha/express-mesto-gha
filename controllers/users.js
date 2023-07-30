@@ -1,9 +1,7 @@
 import {User} from "../models/user.js";
 import {
-  DEFAULT_ERROR_CODE,
-  INTERNAL_SERVER_ERROR,
-  INCORRECT_DATA_ERROR_CODE, INTERSECTION_ERROR,
-  NOT_FOUND_ERROR_CODE, NOT_FOUND_USER_ERROR,
+  INTERSECTION_ERROR,
+  NOT_FOUND_USER_ERROR,
   WRONG_AUTH_ERROR
 } from "../utils/ENUMS.js";
 import bcrypt from 'bcryptjs'
@@ -31,7 +29,14 @@ const login = async (req, res, next) => {
       sameSite: true
     })
 
-    res.send(token)
+    res.send({
+      token,
+      _id: user._id,
+      name: user.name,
+      about: user.about,
+      avatar: user.avatar,
+      email: user.email,
+    })
   } catch (err) {
     next(err)
   }
@@ -51,7 +56,13 @@ const createUser = async (req, res, next) => {
 
     const user = await User.create({name, about, avatar, email, password: hash});
 
-    res.send({data: user})
+    res.send({
+      _id: user._id,
+      name: user.name,
+      about: user.about,
+      avatar: user.avatar,
+      email: user.email,
+    })
   } catch (err) {
     if (err.code === 11000) {
       next(new intersectionError(INTERSECTION_ERROR))
@@ -94,7 +105,7 @@ const getUserInfo = async (req, res, next) => {
     const user = await User.findById(_id)
 
     if (!user) {
-      throw new NotFoundError('Нет пользователя с таким id');
+      throw new NotFoundError(NOT_FOUND_USER_ERROR);
     }
 
     res.send({data: user})

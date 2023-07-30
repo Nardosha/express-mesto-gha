@@ -8,6 +8,9 @@ import {NOT_FOUND_PAGE_ERROR} from "./utils/ENUMS.js";
 import {errors} from "celebrate";
 import NotFoundError from "./errors/NotFoundError.js";
 import {errorHandler} from "./middlewares/errorHandler.js";
+import {validateLogin, validateUserData} from "./utils/validationHelper.js";
+import {createUser, login} from "./controllers/users.js";
+import {auth} from "./middlewares/auth.js";
 
 dotenv.config();
 
@@ -19,8 +22,10 @@ const app = express();
 
 app.use(bodyParser.json())
 
-app.use('/users', usersRoutes)
-app.use('/cards', cardRoutes)
+app.use('/signup', validateLogin, validateUserData, createUser)
+app.use('/signin', validateLogin, login)
+app.use('/users', auth, usersRoutes)
+app.use('/cards', auth, cardRoutes)
 
 app.use((req, res, next) => {
   next(new NotFoundError(NOT_FOUND_PAGE_ERROR))

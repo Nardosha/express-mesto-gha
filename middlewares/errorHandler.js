@@ -6,6 +6,6 @@ export const errorHandler = (err, req, res, next) => {
     ? INTERNAL_SERVER_ERROR
     : err.message
 
-  res.status(statusCode).send({message})
+  res.status(statusCode).send({message: err.message})
   next()
 }

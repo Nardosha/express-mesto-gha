@@ -38,20 +38,14 @@ const deleteCard = async (req, res, next) => {
     const {cardId} = req.params;
     const {_id: userId} = req.user
 
-    const card = await Card.findById(cardId)
 
-    if (!card) {
-      throw new NotFoundError(NOT_FOUND_CARD_ERROR)
-    }
+    const isOwner = Card.isOwner(cardId, userId)
 
-    const ownerId = card.owner.toString()
-    const isOwner = ownerId === userId
 
     if (!isOwner) {
       throw new ForbiddenError(DELETE_CARD_FORBIDDEN_ERROR)
     }
-
-    const deletedCard = await Card.deleteOne(card)
+    const deletedCard = await Card.findByIdAndDelete(cardId)
 
     res.send({data: deletedCard});
   } catch (err) {

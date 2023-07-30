@@ -14,9 +14,9 @@ export const auth = (req, res, next) => {
       throw new UnauthorizedError(UNAUTHORIZED_ERROR)
     }
 
-    const token = extractBearerToken(authorization)
+    const jwtToken = extractBearerToken(authorization)
 
-    req.user = jwt.verify(token, 'shrek')
+    req.user = jwt.verify(jwtToken, 'shrek')
     next()
   } catch (err) {
     next(err)
