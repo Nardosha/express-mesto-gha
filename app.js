@@ -7,6 +7,7 @@ import cardRoutes from "./routes/cards.js";
 import {NOT_FOUND_PAGE_ERROR} from "./utils/ENUMS.js";
 import {errors} from "celebrate";
 import NotFoundError from "./errors/NotFoundError.js";
+import {errorHandler} from "./middlewares/errorHandler.js";
 
 dotenv.config();
 
@@ -27,9 +28,7 @@ app.use((req, res, next) => {
 
 app.use(errors())
 
-app.use((err, req, res, next) => {
-  res.status(err.statusCode).send({ message: err.message });
-});
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`Server started on port: ${PORT}`)

@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
-import {REQUIRED_CARD_NAME_ERR, REQUIRED_LINK_ERR} from "../utils/ENUMS.js";
+import {INCORRECT_URL_ERR, REQUIRED_CARD_NAME_ERR, REQUIRED_LINK_ERR} from "../utils/ENUMS.js";
+import isURL from "validator/lib/isURL.js";
 
 const cardSchema = new mongoose.Schema({
   name: {
@@ -11,6 +12,10 @@ const cardSchema = new mongoose.Schema({
   link:{
     type: String,
     required: [true, REQUIRED_LINK_ERR],
+    validate: {
+      validator: url => isURL(url),
+      message: INCORRECT_URL_ERR
+    },
   },
   owner: {
     type: mongoose.Schema.Types.ObjectId,

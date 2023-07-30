@@ -1,7 +1,7 @@
 import {User} from "../models/user.js";
 import {
   DEFAULT_ERROR_CODE,
-  DEFAULT_MESSAGE,
+  INTERNAL_SERVER_ERROR,
   INCORRECT_DATA_ERROR_CODE, INTERSECTION_ERROR,
   NOT_FOUND_ERROR_CODE, NOT_FOUND_USER_ERROR,
   WRONG_AUTH_ERROR
@@ -27,7 +27,8 @@ const login = async (req, res, next) => {
 
     res.cookie('jwt', token, {
       maxAge: 3600000 * 24 * 7,
-      httpOnly: true
+      httpOnly: true,
+      sameSite: true
     })
 
     res.send(token)
