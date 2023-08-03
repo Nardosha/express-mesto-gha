@@ -3,7 +3,7 @@ import mongosse from 'mongoose';
 import bodyParser from 'body-parser';
 import { errors } from 'celebrate';
 import { PORT, DB_CONNECTION } from './config.js';
-// import { errorLogger, requestLogger } from './middlewares/logger.js';
+import { errorLogger, requestLogger } from './middlewares/logger.js';
 import NotFoundError from './errors/NotFoundError.js';
 import errorHandler from './middlewares/errorHandler.js';
 import auth from './middlewares/auth.js';
@@ -18,16 +18,16 @@ mongosse.connect(DB_CONNECTION);
 
 const app = express();
 
-// app.use(cors);
+app.use(cors);
 app.use(bodyParser.json());
-// app.use(requestLogger);
+app.use(requestLogger);
 
 app.use('/signup', validateLogin, validateUserData, createUser);
 app.use('/signin', validateLogin, login);
 app.use('/users', auth, usersRoutes);
 app.use('/cards', auth, cardRoutes);
 
-// app.use(errorLogger);
+app.use(errorLogger);
 
 
 app.use((req, res, next) => {
