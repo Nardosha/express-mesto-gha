@@ -8,6 +8,3 @@ export const {
   PORT = 3000,
   DB_CONNECTION = "mongodb://localhost:27017/mestodb",
 } = process.env;
-
-
-console.log(NODE_ENV, JWT_SECRET, PORT, DB_CONNECTION)
