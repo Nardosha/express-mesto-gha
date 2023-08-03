@@ -1,115 +1,108 @@
-import Card from '../models/card.js'
-import {DEFAULT_ERROR_CODE, DEFAULT_MESSAGE, INCORRECT_DATA_ERROR_CODE, NOT_FOUND_ERROR_CODE} from "../utils/ENUMS.js";
+import Card from '../models/card.js';
+import {
+  DELETE_CARD_FORBIDDEN_ERROR,
+  NOT_FOUND_CARD_ERROR,
+} from '../utils/ENUMS.js';
+import NotFoundError from '../errors/NotFoundError.js';
+import ForbiddenError from '../errors/ForbiddenError.js';
 
-const createCard = async (req, res) => {
+const createCard = async (req, res, next) => {
   try {
-    const {name, link, ownerId = req.user._id, likes} = req.body;
+    const {
+      name, link, ownerId = req.user._id, likes,
+    } = req.body;
 
-    const card = await Card.create({name, link, owner: ownerId, likes})
-    await card.populate(['owner', 'likes'])
+    const card = await Card.create({
+      name, link, owner: ownerId, likes,
+    });
+    await card.populate(['owner', 'likes']);
 
-    res.send({data: card})
-
+    res.send({ data: card });
   } catch (err) {
-    if (err.name === "CastError") {
-      res.status(NOT_FOUND_ERROR_CODE).send("Переданы некорректные данные при создании карточки.")
-      return
+    next(err);
+  }
+};
+
+const getCards = async (req, res, next) => {
+  try {
+    const cards = await Card.find({});
+
+    res.send({ data: cards });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const deleteCard = async (req, res, next) => {
+  try {
+    const { cardId } = req.params;
+    const { _id: userId } = req.user;
+
+    const card = await Card.findById(cardId);
+
+    if (!card) {
+      throw new NotFoundError(NOT_FOUND_CARD_ERROR);
     }
 
-    res.status(DEFAULT_ERROR_CODE).send(DEFAULT_MESSAGE)
-  }
-}
+    const isOwner = card.owner.toString() === userId;
 
-const getCards = async (req, res) => {
-  try {
-    const cards = await Card.find({})
-
-    res.send({data: cards})
-  } catch (err) {
-    if (err.name === "CastError") {
-      res.status(INCORRECT_DATA_ERROR_CODE).send("Переданы некорректные данные при поиске карточек.")
-      return
+    if (!isOwner) {
+      throw new ForbiddenError(DELETE_CARD_FORBIDDEN_ERROR);
     }
+    const deletedCard = await Card.findByIdAndDelete(cardId);
 
-    res.status(DEFAULT_ERROR_CODE).send(DEFAULT_MESSAGE)
-  }
-}
-
-const deleteCard = async (req, res) => {
-  try {
-    const {cardId} = req.params;
-
-    const card = await Card.findByIdAndRemove(cardId);
-
-    res.send({data: card});
+    res.send({ data: deletedCard });
   } catch (err) {
-    if (err.name === "CastError") {
-      res.status(NOT_FOUND_ERROR_CODE).send("Карточка с указанным _id не найдена.")
-      return
-    }
-
-    res.status(DEFAULT_ERROR_CODE).send(DEFAULT_MESSAGE)
+    next(err);
   }
-}
+};
 
-const likeCard = async (req, res) => {
+const likeCard = async (req, res, next) => {
   try {
     const userId = req.user._id;
-    const {cardId} = req.params;
+    const { cardId } = req.params;
 
-
-    const card = await Card.findByIdAndUpdate(cardId, {
-        $addToSet: {likes: userId}
+    const card = await Card.findByIdAndUpdate(
+      cardId,
+      {
+        $addToSet: { likes: userId },
       },
-      {new: true}
+      { new: true },
     );
 
-    await card.populate('likes')
+    if (!card) {
+      throw new NotFoundError(NOT_FOUND_CARD_ERROR);
+    }
 
-    res.send({data: card});
+    await card.populate('likes');
 
+    res.send({ data: card });
   } catch (err) {
-    if (err.name === "CastError") {
-      res.status(NOT_FOUND_ERROR_CODE).send("Передан несуществующий _id карточки.")
-      return
-    }
-
-    if (err.name === "ValidationError") {
-      res.status(NOT_FOUND_ERROR_CODE).send("Переданы некорректные данные для постановки лайка.")
-      return
-
-    }
-    res.status(DEFAULT_ERROR_CODE).send(DEFAULT_MESSAGE)
+    next(err);
   }
-}
+};
 
-
-const dislikeCard = async (req, res) => {
+const dislikeCard = async (req, res, next) => {
   try {
     const userId = req.user._id;
-    const {cardId} = req.params;
+    const { cardId } = req.params;
 
-    const card = await Card.findByIdAndUpdate(cardId, {$pull: {likes: userId}}, {new: true})
-    res.send({data: card})
+    const card = await Card.findByIdAndUpdate(cardId, { $pull: { likes: userId } }, { new: true });
+
+    if (!card) {
+      throw new NotFoundError(NOT_FOUND_CARD_ERROR);
+    }
+
+    res.send({ data: card });
   } catch (err) {
-    if (err.name === "CastError") {
-      res.status(NOT_FOUND_ERROR_CODE).send("Передан несуществующий _id карточки.")
-      return
-    }
-
-    if (err.name === "ValidationError") {
-      res.status(NOT_FOUND_ERROR_CODE).send("Переданы некорректные данные для снятии лайка.")
-      return
-
-    }
-    res.status(DEFAULT_ERROR_CODE).send(DEFAULT_MESSAGE)
+    next(err);
   }
-}
+};
 
 export {
   createCard,
   getCards,
   deleteCard,
   likeCard,
-  dislikeCard
-}
+  dislikeCard,
+};

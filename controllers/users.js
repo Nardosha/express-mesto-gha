@@ -1,117 +1,169 @@
-import {User} from "../models/user.js";
-import {DEFAULT_ERROR_CODE, DEFAULT_MESSAGE, INCORRECT_DATA_ERROR_CODE, NOT_FOUND_ERROR_CODE} from "../utils/ENUMS.js";
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import { User } from '../models/user.js';
+import {
+  INTERSECTION_ERROR,
+  NOT_FOUND_USER_ERROR,
+  WRONG_AUTH_ERROR,
+} from '../utils/ENUMS.js';
+import NotFoundError from '../errors/NotFoundError.js';
+import UnauthorizedError from '../errors/UnauthorizedError.js';
+import IntersectionError from '../errors/IntersectionError.js';
+import {JWT_SECRET} from '../config.js';
 
-const createUser = async (req, res) => {
+const login = async (req, res, next) => {
   try {
-    const {name, about, avatar} = req.body;
+    const { email, password } = req.body;
+    const user = await User.findUserByCredentials(email, password);
 
-    const user = await User.create({name, about, avatar});
-
-    res.send({data: user})
-  } catch (err) {
-    if (err.name === "CastError") {
-      res.status(NOT_FOUND_ERROR_CODE).send("Переданы некорректные данные при создании пользователя.")
-      return
+    if (!user) {
+      throw new UnauthorizedError(WRONG_AUTH_ERROR);
     }
 
-    res.status(DEFAULT_ERROR_CODE).send(DEFAULT_MESSAGE)
-  }
-}
+    const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
+      expiresIn: 3600000 * 24 * 7,
+    });
 
-const getUsers = async (req, res) => {
+    res.cookie('jwt', token, {
+      maxAge: 3600000 * 24 * 7,
+      httpOnly: true,
+      sameSite: true,
+    });
+
+    res.send({
+      token,
+      _id: user._id,
+      name: user.name,
+      about: user.about,
+      avatar: user.avatar,
+      email: user.email,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const createUser = async (req, res, next) => {
+  try {
+    const {
+      name = undefined,
+      about = undefined,
+      avatar = undefined,
+      email,
+      password,
+    } = req.body;
+
+    const hash = await bcrypt.hash(password, 10);
+
+    const user = await User.create({
+      name, about, avatar, email, password: hash,
+    });
+
+    res.send({
+      _id: user._id,
+      name: user.name,
+      about: user.about,
+      avatar: user.avatar,
+      email: user.email,
+    });
+  } catch (err) {
+    if (err.code === 11000) {
+      next(new IntersectionError(INTERSECTION_ERROR));
+      return;
+    }
+
+    next(err);
+  }
+};
+
+const getUsers = async (req, res, next) => {
   try {
     const users = await User.find({});
 
-    res.send({data: users})
+    res.send({ data: users });
   } catch (err) {
-    if (err.name === "CastError") {
-      res.status(INCORRECT_DATA_ERROR_CODE).send("Переданы некорректные данные при поиске пользователей.")
-      return
-    }
-
-    res.status(DEFAULT_ERROR_CODE).send(DEFAULT_MESSAGE)
+    next(err);
   }
+};
 
-}
-
-
-const getUser = async (req, res) => {
+const getUser = async (req, res, next) => {
   try {
-    const {userId} = req.params;
+    const { userId } = req.params;
 
-    const user = await User.findById(userId)
-    res.send({data: user})
-  } catch (err) {
-    if (err.name === "CastError") {
-      res.status(NOT_FOUND_ERROR_CODE).send("Пользователь по указанному _id не найден.")
-      return
+    const user = await User.findById(userId);
+
+    if (!user) {
+      throw new NotFoundError(NOT_FOUND_USER_ERROR);
     }
 
-    res.status(DEFAULT_ERROR_CODE).send(DEFAULT_MESSAGE)
+    res.send({ data: user });
+  } catch (err) {
+    next(err);
   }
-}
+};
 
-const updateUser = async (req, res) => {
+const getUserInfo = async (req, res, next) => {
   try {
-    const userId = req.user._id;
+    const { _id } = req.user;
+    const user = await User.findById(_id);
 
-    const user = await User.findByIdAndUpdate(userId, {...req.body}, {
-      new: true,
-      runValidators: true,
-      upsert: true
-    });
+    if (!user) {
+      throw new NotFoundError(NOT_FOUND_USER_ERROR);
+    }
 
-    res.send({data: user});
-
+    res.send({ data: user });
   } catch (err) {
-    if (err.name === "CastError") {
-      res.status(NOT_FOUND_ERROR_CODE).send("Пользователь с указанным _id не найден.")
-      return
-    }
-
-    if (err.name === "ValidationError") {
-      res.status(NOT_FOUND_ERROR_CODE).send("Переданы некорректные данные при обновлении профиля.")
-      return
-
-    }
-    res.status(DEFAULT_ERROR_CODE).send(DEFAULT_MESSAGE)
+    next(err);
   }
-}
+};
 
-
-const updateAvatar = async (req, res) => {
+const updateUser = async (req, res, next) => {
   try {
     const userId = req.user._id;
-    const {avatar} = req.body;
 
-    const user = await User.findByIdAndUpdate(userId, {avatar}, {
+    const user = await User.findByIdAndUpdate(userId, { ...req.body }, {
       new: true,
       runValidators: true,
-      upsert: true
+      upsert: true,
     });
 
-    res.send({data: user});
+    if (!user) {
+      throw new NotFoundError(NOT_FOUND_USER_ERROR);
+    }
 
+    res.send({ data: user });
   } catch (err) {
-    if (err.name === "CastError") {
-      res.status(NOT_FOUND_ERROR_CODE).send("Пользователь с указанным _id не найден.")
-      return
-    }
-
-    if (err.name === "ValidationError") {
-      res.status(NOT_FOUND_ERROR_CODE).send("Переданы некорректные данные при обновлении аватара..")
-      return
-
-    }
-    res.status(DEFAULT_ERROR_CODE).send(DEFAULT_MESSAGE)
+    next(err);
   }
-}
+};
 
+const updateAvatar = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    const { avatar } = req.body;
+
+    const user = await User.findByIdAndUpdate(userId, { avatar }, {
+      new: true,
+      runValidators: true,
+      upsert: true,
+    });
+
+    if (!user) {
+      throw new NotFoundError(NOT_FOUND_USER_ERROR);
+    }
+
+    res.send({ data: user });
+  } catch (err) {
+    next(err);
+  }
+};
 
 export {
+  login,
   createUser,
   getUsers,
   getUser,
   updateUser,
-  updateAvatar
-}
+  updateAvatar,
+  getUserInfo,
+};

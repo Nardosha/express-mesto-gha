@@ -1,13 +1,19 @@
-import express from "express"
-import {createUser, getUser, getUsers, updateAvatar, updateUser} from "../controllers/users.js";
+import express from 'express';
+import {
+  getUser, getUsers, updateAvatar, updateUser, getUserInfo,
+} from '../controllers/users.js';
+import {
+  validateUserData,
+  validateUserUrl,
+  validateUserId,
+} from '../utils/validationHelper.js';
 
 const router = express.Router();
 
-router.post('/', createUser);
 router.get('/', getUsers);
-router.get('/:userId', getUser);
-
-router.patch('/me', updateUser)
-router.patch('/me/avatar', updateAvatar)
+router.get('/me', getUserInfo);
+router.get('/:userId', validateUserId, getUser);
+router.patch('/me', validateUserData, updateUser);
+router.patch('/me/avatar', validateUserUrl, updateAvatar);
 
 export default router;
