@@ -23,14 +23,14 @@ const limiter = rateLimit({
   max: 100
 });
 
-app.use(helmet());
-app.use(cors);
 app.use(limiter)
+app.use(helmet());
+app.use(requestLogger);
+app.use(cors);
 
 mongosse.connect(DB_CONNECTION);
 
 app.use(bodyParser.json());
-app.use(requestLogger);
 
 app.use('/signup', validateLogin, validateUserData, createUser);
 app.use('/signin', validateLogin, login);
