@@ -3,6 +3,7 @@ import mongosse from 'mongoose';
 import helmet from "helmet";
 import rateLimit from 'express-rate-limit'
 import bodyParser from 'body-parser';
+import cookieParser from 'cookie-parser'
 import { errors } from 'celebrate';
 import { PORT, DB_CONNECTION } from './config.js';
 import { errorLogger, requestLogger } from './middlewares/logger.js';
@@ -23,9 +24,14 @@ const limiter = rateLimit({
   max: 100
 });
 
-app.use(limiter)
+app.use(limiter);
+
 app.use(helmet());
+
 app.use(requestLogger);
+
+app.use(cookieParser());
+
 app.use(cors);
 
 mongosse.connect(DB_CONNECTION);

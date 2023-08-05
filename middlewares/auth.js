@@ -3,22 +3,15 @@ import UnauthorizedError from '../errors/UnauthorizedError.js';
 import { UNAUTHORIZED_ERROR } from '../utils/ENUMS.js';
 import { JWT_SECRET } from '../config.js';
 
-const extractBearerToken = (header) => header.replace('Bearer ', '');
-
 const auth = (req, res, next) => {
   try {
-    const { authorization } = req.headers;
+    const { token } = req.cookies.jwt;
 
-    if (!authorization || !authorization?.startsWith('Bearer ')) {
-      throw new UnauthorizedError(UNAUTHORIZED_ERROR);
-    }
+    req.user = jwt.verify(token, JWT_SECRET);
 
-    const jwtToken = extractBearerToken(authorization);
-
-    req.user = jwt.verify(jwtToken, JWT_SECRET);
     next();
   } catch (err) {
-    next(err);
+    next(new UnauthorizedError(UNAUTHORIZED_ERROR));
   }
 };
 
