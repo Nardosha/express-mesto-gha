@@ -1,5 +1,7 @@
 import express from 'express';
 import mongosse from 'mongoose';
+import helmet from "helmet";
+import rateLimit from 'express-rate-limit'
 import bodyParser from 'body-parser';
 import { errors } from 'celebrate';
 import { PORT, DB_CONNECTION } from './config.js';
@@ -14,11 +16,19 @@ import { validateLogin, validateUserData } from './utils/validationHelper.js';
 import { createUser, login } from './controllers/users.js';
 import { NOT_FOUND_PAGE_ERROR } from './utils/ENUMS.js';
 
-mongosse.connect(DB_CONNECTION);
-
 const app = express();
 
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100
+});
+
+app.use(helmet());
 app.use(cors);
+app.use(limiter)
+
+mongosse.connect(DB_CONNECTION);
+
 app.use(bodyParser.json());
 app.use(requestLogger);
 
