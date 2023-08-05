@@ -30,14 +30,16 @@ const login = async (req, res, next) => {
       sameSite: true,
     });
 
-    res.send({
+    const loggedUser = {
       token,
       _id: user._id,
       name: user.name,
       about: user.about,
       avatar: user.avatar,
       email: user.email,
-    });
+    }
+
+    res.send({data: loggedUser});
   } catch (err) {
     next(err);
   }
@@ -59,13 +61,15 @@ const createUser = async (req, res, next) => {
       name, about, avatar, email, password: hash,
     });
 
-    res.send({
+    const newUser = {
       _id: user._id,
       name: user.name,
       about: user.about,
       avatar: user.avatar,
       email: user.email,
-    });
+    };
+
+    res.send({data: newUser});
   } catch (err) {
     if (err.code === 11000) {
       next(new IntersectionError(INTERSECTION_ERROR));
