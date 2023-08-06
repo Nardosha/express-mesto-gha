@@ -20,6 +20,8 @@ const login = async (req, res, next) => {
       throw new UnauthorizedError(WRONG_AUTH_ERROR);
     }
 
+    console.log(JWT_SECRET)
+
     const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
       expiresIn: 3600000 * 24 * 7,
     });
