@@ -25,11 +25,11 @@ const limiter = rateLimit({
   max: 100,
 });
 
-app.use(limiter);
-
 app.use(helmet());
 
 app.use(requestLogger);
+
+app.use(limiter);
 
 app.use(cookieParser());
 
