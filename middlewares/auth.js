@@ -5,7 +5,6 @@ import {JWT_SECRET} from '../config.js';
 
 const auth = (req, res, next) => {
   const {token} = req.cookies;
-  console.log(token)
 
   let user;
 
